@@ -2,10 +2,20 @@ import styled from 'styled-components';
 import Button from '../buttons/Button';
 import LinkButton from '../buttons/LinkButton';
 import { devices } from "../../constants";
-import { Component } from 'react';
-import MarvelService from '../../services/MarvelService';
+import { useState, useEffect } from 'react';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../error-message/ErrorMessage';
+
+const BannerContainer = styled.div`
+    width: 100%;
+    display: flex;
+    max-height: 250px;
+    @media only screen and ${devices.lg} {
+        flex-direction: column;
+        max-height: none;
+    }
+`;
 
 const RandomCharacterContainer = styled.div`
     display: flex;
@@ -105,55 +115,38 @@ const View = character => {
 };
 
 
-class RandomCharacter extends Component {
+const RandomCharacter = () => {
 
-    state = {
-        character: {},
-        loading: true,
-        error: false
-    };
+    const { loading, error, getCharacterById } = useMarvelService();
+    const [character, setCharacter] = useState({});
 
-    marvelService = new MarvelService();
+    useEffect(() => {
+        fullfillCharacter();
+    }, []);
 
-    componentDidMount() {
-        this.fullfillCharacter();
-    }
-
-    fullfillCharacter = () => {
+    const fullfillCharacter = () => {
         const randomId = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-        this.marvelService.getCharacterById(randomId)
-            .then(this.onLoadedCharacter)
-            .catch(this.onError);
+        getCharacterById(randomId)
+            .then((character) => setCharacter(character));
     }
 
-    onLoadedCharacter = (character) => {
-        this.setState({ character, loading: false })
-    }
+    const spinner = loading ? <Spinner/> : null;
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const content = !(spinner || errorMessage) ? <View character={character} /> : (spinner || errorMessage);
 
-    onError = () => {
-        this.setState({ error: true, loading: false  })
-    }
-
-    render() {
-        const { character, loading, error } = this.state;
-        const spinner = loading ? <Spinner/> : null;
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const content = !(spinner || errorMessage) ? <View character={character} /> : (spinner || errorMessage);
-
-        return (
-            <>
-                <RandomCharacterContainer>
-                    {content}
-                </RandomCharacterContainer>
-                <CallToActionContainer>
-                    <p>Random character for today!<br/>Do you want to get to know him better?</p>
-                    <p>Or choose another one</p>
-                    <Decoration/>
-                    <Button type='button' onClick={this.fullfillCharacter} main>Try it</Button>
-                </CallToActionContainer>
-            </>
-        )
-    }
+    return (
+        <BannerContainer>
+            <RandomCharacterContainer>
+                {content}
+            </RandomCharacterContainer>
+            <CallToActionContainer>
+                <p>Random character for today!<br/>Do you want to get to know him better?</p>
+                <p>Or choose another one</p>
+                <Decoration/>
+                <Button type='button' onClick={fullfillCharacter} main>Try it</Button>
+            </CallToActionContainer>
+        </BannerContainer>
+    )
 }
 
 export default RandomCharacter;

@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { Component, useState } from "react";
 import { styled } from "styled-components";
 
 
@@ -36,37 +36,30 @@ const BottomBlock = styled.div`
     }
 `;
 
-class CharacterCard extends Component {
-    state = {
-        isSelected: false
+const CharacterCard = ({ name, thumbnail, active, onSelect }) => {
+    const [isSelected, setIsSelected] = useState(false)
+
+    const focus = () => {
+        setIsSelected(true);
     }
 
-    focus = () => {
-        console.log(this)
-        this.setState({ isSelected: true });
+    const unfocus = () => {
+        setIsSelected(false);
     }
 
-    unfocus = () => {
-        this.setState({ isSelected: false });
-    }
-
-    render() {
-        const { name, thumbnail, customClickEvent, customRefEvent } = this.props;
-        const { isSelected } = this.state;
-        return (
-            <CardContainer 
-                onClick={() => { customClickEvent(); customRefEvent() }}
-                isSelected={isSelected}>
-                <TopBlock>
-                    <img src={thumbnail} alt="Marvel">
-                    </img>
-                </TopBlock>
-                <BottomBlock>
-                    <p>{name}</p>
-                </BottomBlock>
-            </CardContainer>
-        )
-    }
+    return (
+        <CardContainer
+            onClick={onSelect}
+            isSelected={isSelected || active}>
+            <TopBlock>
+                <img src={thumbnail} alt="Marvel">
+                </img>
+            </TopBlock>
+            <BottomBlock>
+                <p>{name}</p>
+            </BottomBlock>
+        </CardContainer>
+    )
 
 }
 

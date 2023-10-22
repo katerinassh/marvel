@@ -2,8 +2,8 @@ import { styled } from "styled-components";
 import { devices } from "../../constants";
 import LinkButton from '../buttons/LinkButton';
 import DefaultBigCart from "../default-big-card/DefaultBigCard";
-import { Component } from "react";
-import MarvelService from "../../services/MarvelService";
+import { useEffect, useState } from "react";
+import useMarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../error-message/ErrorMessage";
 
@@ -79,63 +79,39 @@ const ListWithItems = styled.ul`
     }
 `;
 
-class BigCart extends Component {
-    state = {
-        character: null,
-        loading: false,
-        error: false
-    }
+const BigCart = ({ characterId }) => {
 
-    marvelService = new MarvelService();
+    const { loading, error, getCharacterById } = useMarvelService();
+    const [character, setCharacter] = useState(null);
 
-    componentDidMount() {
-        this.loadCharacter();
-    }
+    useEffect(() => {
+        loadCharacter();
+    }, [])
 
-    componentDidUpdate(prevProps) {
-        if (this.props.characterId !== prevProps.characterId) {
-            this.loadCharacter();
-        }
-    }
+    useEffect(() => {
+        loadCharacter();
+    }, [characterId])
 
-
-    onLoading = () => {
-        this.setState({ loading: true });
-    }
-
-
-    onLoadedCharacter = (character) => {
-        this.setState({ character, loading: false })
-    }
-
-    onError = () => {
-        this.setState({ error: true, loading: false  })
-    }
-
-    loadCharacter = () => {
-        const { characterId } = this.props;
+    const loadCharacter = () => {
         if (!characterId) return;
-        this.onLoading();
 
-        this.marvelService.getCharacterById(characterId)
-            .then(this.onLoadedCharacter)
-            .catch(this.onError);
+        getCharacterById(characterId)
+            .then(onLoadedCharacter);
     }
 
-    render() {
-        const { character, loading, error } = this.state;
-        const defaultCart = (!character && !loading && !error) ? <DefaultBigCart/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const content = !(spinner || errorMessage || defaultCart) ? <View character={character} /> : (spinner || errorMessage || defaultCart);
-
-        return (
-            <BigCartContainer>
-                { content }
-            </BigCartContainer>
-        )
+    const onLoadedCharacter = (character) => {
+        setCharacter(character);
     }
 
+    const defaultCart = (!character && !loading && !error) ? <DefaultBigCart/> : null;
+    const spinner = loading ? <Spinner/> : null;
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const content = !(spinner || errorMessage || defaultCart) ? <View character={character} /> : (spinner || errorMessage || defaultCart);
+    return (
+        <BigCartContainer>
+            { content }
+        </BigCartContainer>
+    )
 }
 
 const View = character => {
@@ -158,15 +134,15 @@ const View = character => {
     return (
         <>
             <BriedInfo>
-            <img src={ thumbnail } alt={ name }/>
-            <RightColumn>
-                <p>{ name }</p>
-                <Buttons>
-                    <LinkButton as="a"  href={homepage} main>homepage</LinkButton>
-                    <LinkButton as="a"  href={wiki}>wiki</LinkButton>
-                </Buttons>
-            </RightColumn>
-        </BriedInfo>
+                <img src={ thumbnail } alt={ name }/>
+                <RightColumn>
+                    <p>{ name }</p>
+                    <Buttons>
+                        <LinkButton as="a"  href={homepage} main>homepage</LinkButton>
+                        <LinkButton as="a"  href={wiki}>wiki</LinkButton>
+                    </Buttons>
+                </RightColumn>
+            </BriedInfo>
             <TextWrapper>
                 <p>{description}</p>
             </TextWrapper>

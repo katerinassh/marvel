@@ -1,37 +1,26 @@
-import { Component } from 'react';
+import { useRef, useState } from 'react';
 import './App.css';
 import AppHeader from './components/app-header/AppHeader';
 import CharactersSection from './components/characters-section/CharactersSection';
 import ComicsSection from './components/comics-section/ComicsSection';
 
 
-class App extends Component {
-  state = {
-    isCharactresSelected: true
-  };
+const App = () => {
+  const [isCharactresSelected, setCharactresSelection] = useState(true);
 
-  toggleContent = (arg) => {
-    this.setState({ isCharactresSelected: arg })
-  };
+  const appRef = useRef(null);
 
-  returnBackground() {
-    if (this.state.isCharactresSelected) return <div className="background"/>
-  }
-
-  render() {
-    const { isCharactresSelected } = this.state;
-    return (
-      <>
-        <div className="App">
-          <AppHeader
-            isCharactresSelected={isCharactresSelected}
-            toggleContent={this.toggleContent}/>
-          {isCharactresSelected ? <CharactersSection/> : <ComicsSection/> }
-        </div>
-        { this.returnBackground() }
-      </>
-    );
-  }
+  return (
+    <>
+      <div className="App" ref={appRef}>
+        <AppHeader
+          isCharactresSelected={isCharactresSelected}
+          toggleContent={(boolValue) => setCharactresSelection(boolValue)}/>
+        {isCharactresSelected ? <CharactersSection appRef={appRef}/> : <ComicsSection/> }
+      </div>
+      { isCharactresSelected ? <div className="background"/> : null }
+    </>
+  );
 }
 
 export default App;

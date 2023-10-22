@@ -1,8 +1,8 @@
 import { styled } from "styled-components";
 import CharacterCard from "../character-cart/CharacterCard";
 import Button from "../buttons/Button";
-import { Component } from "react";
-import MarvelService from "../../services/MarvelService";
+import { useState, useRef, useEffect } from "react";
+import useMarvelService from "../../services/MarvelService";
 
 const CardMenuContainer = styled.div`
     width: 60%;
@@ -23,73 +23,54 @@ const LoadMore = styled.div`
     }
 `;
 
-class CardMenu extends Component {
-    constructor(props) {
-        super(props);
-        this.selectedCards = [];
-        this.state = {
-            data: [],
-            offset: 200,
-            charactersEnded: false
-        }
+const CardMenu = ({onSelectCharacter, selectedCharacter}) => {
+    const { getAllCharacters } = useMarvelService();
+
+    const [data, setData] = useState([]);
+    const [offset, setOffset] = useState(200);
+    const [charactersEnded, setCharactersEnded] = useState(false);
+
+    useEffect(() => {
+        loadCharacters();
+    }, [])
+
+    const loadCharacters = offset => {
+        getAllCharacters(offset).then(onLoadded);
     }
 
-    marvelService = new MarvelService();
-
-    setRef = ref => {
-        this.selectedCards.push(ref);
+    const onLoadded = newData => {
+        setData(data => [...data, ...newData]);
+        setOffset(offset => offset + 9);
+        setCharactersEnded(newData.length < 9 ? true : false)
     }
 
-    focusOnItem = id => {
-        this.selectedCards.forEach(card => card?.unfocus());
-        this.selectedCards[id].focus();
-    }
-
-    loadCharacters = offset => {
-        this.marvelService.getAllCharacters(offset)
-            .then(this.onLoadded);
-    }
-
-    onLoadded = newData => {
-        this.setState(({ data, offset }) => ({
-            data: [...data, ...newData],
-            offset: offset + 9,
-            charactersEnded: newData.length < 9 ? true : false
-        }));
-    }
-
-    componentDidMount() {
-        this.loadCharacters();
-    }
-
-    render() {
-        const { data, offset, charactersEnded } = this.state;
-        const cards = data.map((character, i) => {
-            const { id, ...itemProps } = character;
-            return (
-                <CharacterCard
-                    ref={this.setRef}
-                    customClickEvent={() => this.props.onSelectCharacter(id)}
-                    customRefEvent={() => this.focusOnItem(i)}
-                    key={ id } {...itemProps}/>
-            )
-        });
+    const cards = data.map((character, i) => {
+        const { id, ...itemProps } = character;
 
         return (
-            <CardMenuContainer>
-                <Cards>
-                    {cards}
-                </Cards>
-                <LoadMore>
-                    <Button
-                        onClick={() => this.loadCharacters(offset)}
-                        type='button'
-                        main
-                        hide={charactersEnded}>Load more</Button>
-                </LoadMore>
-            </CardMenuContainer>
+            <CharacterCard
+                key={ id } 
+                active={selectedCharacter === id}
+                onSelect={() => onSelectCharacter(id)}
+                {...itemProps}
+            />
         )
-    }
+    });
+
+    return (
+        <CardMenuContainer>
+            <Cards>
+                {cards}
+            </Cards>
+            <LoadMore>
+                <Button
+                    onClick={() => loadCharacters(offset)}
+                    type='button'
+                    main
+                    hide={charactersEnded}>Load more</Button>
+            </LoadMore>
+        </CardMenuContainer>
+    )
 }
 
 export default CardMenu;

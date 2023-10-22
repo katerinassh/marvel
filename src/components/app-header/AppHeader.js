@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 const Header = styled.header`
@@ -34,26 +33,22 @@ const SwitchMenuSpan = styled.span`
 `;
 
 
-class AppHeader extends Component {
-    render() {
-        const { isCharactresSelected, toggleContent } = this.props;
-
-        return (
-            <Header>
-                <Title><span>Marvel </span>information portal</Title>
-                <NavigationTitle>
-                    <SwitchMenuSpan 
-                        id='characters'
-                        isSelected={isCharactresSelected}
-                        onClick={() => toggleContent(true)}>Characters</SwitchMenuSpan> 
-                    / 
-                    <SwitchMenuSpan
-                        id='comics'
-                        isSelected={!isCharactresSelected}
-                        onClick={() => toggleContent(false)}>Comics</SwitchMenuSpan></NavigationTitle>
-            </Header>
-        )
-    }
+const AppHeader = ({ isCharactresSelected, toggleContent }) => {
+    return (
+        <Header>
+            <Title><span>Marvel </span>information portal</Title>
+            <NavigationTitle>
+                <SwitchMenuSpan 
+                    id='characters'
+                    isSelected={isCharactresSelected}
+                    onClick={() => toggleContent(true)}>Characters</SwitchMenuSpan> 
+                / 
+                <SwitchMenuSpan
+                    id='comics'
+                    isSelected={!isCharactresSelected}
+                    onClick={() => toggleContent(false)}>Comics</SwitchMenuSpan></NavigationTitle>
+        </Header>
+    )
 }
 
 AppHeader.propTypes = {
